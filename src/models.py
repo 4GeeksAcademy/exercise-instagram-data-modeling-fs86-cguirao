@@ -1,6 +1,6 @@
 import os
 import sys
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String, Enum
 from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy import create_engine
 from eralchemy2 import render_er
@@ -9,8 +9,8 @@ Base = declarative_base()
 
 class Follower(Base):
     __tablename__ = 'follower'
-    user_from_id = Column(Integer, ForeignKey('user.id'), nullable=False)
-    user_to_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    user_from_id = Column(Integer, ForeignKey('user.id'), primary_key=True)
+    user_to_id = Column(Integer, ForeignKey('user.id'), primary_key=True)
     user_from = relationship("User", foreign_keys=[user_from_id])
     user_to = relationship("User", foreign_keys=[user_to_id])
 
@@ -23,7 +23,7 @@ class User(Base):
     email = Column(String, nullable=False)
     posts = relationship("Post", back_populates="user")
     comments = relationship("Comment", back_populates="user")
-    followers = relationship("Follower", foreign_keys=[Follower.user_to_id])
+    followers = relationship("Follower", foreign_keys="[Follower.user_to_id]")
 
 class Comment(Base):
     __tablename__ = 'comment'
@@ -47,12 +47,10 @@ class Post(Base):
 class Media(Base):
     __tablename__ = 'media'
     id = Column(Integer, primary_key=True)
-    type=Column(enumerate)
+    type = Column(Enum("image", "video", "audio", name="media_type"), nullable=False)
     url = Column(String, nullable=False)
     post_id = Column(Integer, ForeignKey('post.id'), nullable=False)
     post = relationship("Post", back_populates="media")
-
-
 
 # Generate diagram
 try:
